@@ -159,6 +159,33 @@ class IndexReader:
         token (i.e., word)
         Returns 0 if there are no reviews containing this
         token"""
+        iterationsArr = []
+        pointer = 0
+        isThere = False
+        reviewsTextDic = os.path.join(self.dir, "Dir", "text.dic")
+        with open(reviewsTextDic, "r") as dicFile:
+            tempLine = dicFile.read()
+            tempDic = json.loads(tempLine)
+            for key in tempDic:
+                if token == key:
+                    pointer = tempDic[key]["pointer_To_List"]
+                    break
+
+        reviewsTextList = os.path.join(self.dir, "Dir", "text.lst")
+        with open(reviewsTextList, "r") as dicFile:
+            tempLine = dicFile.read()
+            tempDic = json.loads(tempLine)
+            for key in tempDic:
+                if pointer == int(key):
+                    isThere = True
+                    for num in tempDic[key]["iteration_times"]:
+                        if num != 0:
+                            iterationsArr.append(num)
+                        
+            if isThere == True:
+                print(f'({token}) has been repeated in ({len(iterationsArr)}) reviews')
+            else:
+                print(0)
        
 
     def getTokenCollectionFrequency(self, token):
@@ -168,24 +195,16 @@ class IndexReader:
         Returns 0 if there are no reviews containing this
         token"""
         data = os.path.join(self.dir, "Dir", "text.dic")
-        isThere = True
-        with open(data, "r") as dataFile:
-            tempLine = dataFile.readline()
-            tempLine = ast.literal_eval(tempLine)
-
-            while len(tempLine) > 0:
-                if tempLine[0] == token:
-                    print(tempLine[1])
-                    isThere = False
+        with open(data, "r") as dicFile:
+            tempLine = dicFile.read()
+            tempDic = json.loads(tempLine)
+            for key in tempDic:
+                if token == key:
+                    num = tempDic[key]["number_of_repetition"]
+                    print(f'({token}) has appeared ({num}) times.')
                     break
-                
-                tempLine = dataFile.readline()
-                if len(tempLine) == 0:
-                    break
-                tempLine = ast.literal_eval(tempLine)
-            
-        if isThere == True:
-            print("0")
+            else:
+                print(0)
 
 
     def getReviewsWithToken(self, token):
@@ -197,6 +216,35 @@ class IndexReader:
         Note that the integers should be sorted by id
         Returns an empty Tuple if there are no reviews
         containing this token"""
+        pointer = 0
+        myTuple = ()
+        lelo = []
+        reviewsTextDic = os.path.join(self.dir, "Dir", "text.dic")
+        with open(reviewsTextDic, "r") as dicFile:
+            tempLine = dicFile.read()
+            tempDic = json.loads(tempLine)
+            for key in tempDic:
+                if token == key:
+                    pointer = tempDic[key]["pointer_To_List"]
+                    break
+
+        reviewsTextList = os.path.join(self.dir, "Dir", "text.lst")
+        with open(reviewsTextList, "r") as dicFile:
+            tempLine = dicFile.read()
+            tempDic = json.loads(tempLine)
+            for key in tempDic:
+                if pointer == int(key):
+                    for num in tempDic[key]["iteration_times"]:
+                        if num != 0:
+                            myIndex = tempDic[key]["iteration_times"].index(num)
+                            review = tempDic[key]["Review_Id"][myIndex]
+                            myTuple = myTuple + (review, num)
+                            # lelo.append([review, num])
+                            tempDic[key]["iteration_times"][myIndex] = 0
+                            # tempList = list(myTuple)
+                            # tempList.append((review, num))
+
+            print(f'({token}) has been showed in {myTuple}')
 
 
     def getNumberOfReviews(self):
@@ -235,7 +283,6 @@ class IndexReader:
             tempLine = dicFile.read()
             tempDic = json.loads(tempLine)
             for key in tempDic:
-                # whichId = str(count)
                 if productId == tempDic[key]["product/productId"]:
                     pointer = tempDic[key]["pointer_To_List"]
                     break
@@ -249,6 +296,4 @@ class IndexReader:
                 if temp == key:
                     print(tuple(tempDic[key]["Review_Id"]))
                     break
-
                 count += 1
-
